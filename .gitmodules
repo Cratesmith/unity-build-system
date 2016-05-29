@@ -1,0 +1,3 @@
+[submodule "unity-build-system"]
+	path = unity-build-system
+	url = https://github.com/Cratesmith/unity-build-system.git
