@@ -63,7 +63,7 @@ namespace UBS
 
 #endif
 
-#if UNITY_4_5 || UNITY_4_6 || UNITY_5
+#if UNITY_4_5 || UNITY_4_6 || UNITY_5 
 			case BuildTarget.BlackBerry: return BuildTargetGroup.BlackBerry;
 #else
 			case BuildTarget.BlackBerry: return BuildTargetGroup.BB10;
@@ -73,8 +73,10 @@ namespace UBS
 					return BuildTargetGroup.PS3;
 				case BuildTarget.PS4:
 					return BuildTargetGroup.PS4;
-				case BuildTarget.StandaloneGLESEmu:
-				case BuildTarget.StandaloneLinux:
+#if UNITY_4_5 || UNITY_4_6 || UNITY_5_0 || UNITY_5_0 || UNITY_5_1 || UNITY_5_2 || UNITY_5_3
+                case BuildTarget.StandaloneGLESEmu:
+#endif
+                case BuildTarget.StandaloneLinux:
 				case BuildTarget.StandaloneLinux64:
 				case BuildTarget.StandaloneLinuxUniversal:
 				case BuildTarget.StandaloneOSXIntel:
