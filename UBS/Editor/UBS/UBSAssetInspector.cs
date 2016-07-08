@@ -3,6 +3,7 @@ using UnityEditor;
 using UnityEngine;
 using UBS;
 using System.IO;
+using System.Linq;
 
 namespace UBS
 {
@@ -93,30 +94,59 @@ namespace UBS
 
 			GUILayout.BeginHorizontal();
 			{
-				if (GUILayout.Button("Edit"))
-				{
-					UBSEditorWindow.Init(data);
-				}
-				GUILayout.Space(5);
 				GUI.enabled = selectedCount >= 1;
 
-				if (GUILayout.Button("Run selected builds"))
-				{
-					UBSBuildWindow.Init(data);
-				}
-				GUILayout.Space(5);
+                GUILayout.BeginVertical("Box");
+                {
+                    GUILayout.Label("Build");
+                    if (GUILayout.Button("Full Build"))
+    				{
+    					UBSBuildWindow.Init(data);
+    				}
+
+                    if (GUILayout.Button("Current scene(s)"))
+                    {
+                        UBSBuildWindow.Init(data.CreateCurrentSceneClone());
+                    }
+                }
+                GUILayout.EndVertical();
+
+				GUILayout.Space(2);
 
 				GUI.enabled = selectedCount == 1;
-				if (GUILayout.Button("Build and run"))
-				{
-					UBSBuildWindow.Init(data, true);
-				}
-				GUI.enabled = true;
+                GUILayout.BeginVertical("Box");
+                {                    
+                    GUILayout.Label("Build & Run");
+        			if (GUILayout.Button("Full Build"))
+        			{
+        				UBSBuildWindow.Init(data, true);
+        			}
 
-				if (GUILayout.Button("?", GUILayout.Width(32)))
-				{
-					EditorUtility.OpenWithDefaultApp("http://kwnetzwelt.net/unity-build-system");
-				}
+                    if (GUILayout.Button("Current scene(s)"))
+                    {
+                        UBSBuildWindow.Init(data.CreateCurrentSceneClone(), true);
+                    }
+                }
+                GUILayout.EndVertical();
+
+				GUI.enabled = true;
+                GUILayout.Space(2);
+
+                GUILayout.BeginVertical("Box");
+                {
+                    GUILayout.Label("Options");
+                    if (GUILayout.Button("Edit"))
+                    {
+                        UBSEditorWindow.Init(data);
+                    }
+
+                    if (GUILayout.Button("?"))
+                    {
+                        EditorUtility.OpenWithDefaultApp("http://kwnetzwelt.net/unity-build-system");
+                    }
+                }
+                GUILayout.EndVertical();
+
 			}
 			GUILayout.EndHorizontal(); 
 		}

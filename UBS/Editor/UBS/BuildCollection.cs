@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 namespace UBS
 {
@@ -34,6 +35,17 @@ namespace UBS
 		{
 			UnityEditor.PlayerSettings.Android.bundleVersionCode = int.Parse(versionCode);
 		}
+
+        public BuildCollection CreateCurrentSceneClone()
+        {                        
+            var temp = BuildCollection.Instantiate(this);
+            foreach(var i in temp.mProcesses)
+            {
+                i.mScenes = UnityEditor.SceneManagement.EditorSceneManager.GetAllScenes().Select(x=>x.path).ToList();
+            }
+            UnityEditor.AssetDatabase.CreateAsset(temp, "Assets/temp_build.asset");
+            return temp;
+        }
 	}
 }
 
