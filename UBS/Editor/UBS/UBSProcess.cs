@@ -19,8 +19,7 @@ namespace UBS
         {
             get
             {
-                return UnityEditorInternal.InternalEditorUtility.HasPro() ? 
-					UBSBuildBehavior.auto : UBSBuildBehavior.manual;
+                return UBSBuildBehavior.auto;
             }
         }
 
@@ -36,6 +35,7 @@ namespace UBS
         [SerializeField]
         bool
             mBuildAndRun;
+        public bool IsBuildAndRun { get { return mBuildAndRun; } }
 
         [SerializeField]
         bool
@@ -218,7 +218,7 @@ namespace UBS
                     tagName = s.Substring(availableArgs[6].Length);
                 }
 			}
-			if(collectionPath == null)
+			if(string.IsNullOrEmpty(collectionPath))
 			{
 				Debug.LogError("NO BUILD COLLECTION SET");
 				return;
@@ -256,9 +256,9 @@ namespace UBS
 			{
 				while(true)
 				{
-					process.MoveNext();
-					Debug.Log("Wait..");
-					Debug.Log ("Process state: " + process.CurrentState);
+                    Debug.Log("Process[" + process.CurrentProcessName + "] state: " + process.CurrentState);
+                    process.MoveNext();
+//					Debug.Log("Wait..");
 					if(process.CurrentState == UBSState.done)
 					{
 						return;
@@ -461,6 +461,9 @@ namespace UBS
 
 			if(!CurrentProcess.mPretend)
 			{
+                // create output folder (android builds seem to fail if this isn't done)
+			    Directory.CreateDirectory(Path.GetDirectoryName(CurrentProcess.mOutputPath));
+
 				BuildPipeline.BuildPlayer(
 					scenes.ToArray(),
 					CurrentProcess.mOutputPath,
@@ -468,13 +471,21 @@ namespace UBS
 					bo );
 			}
 
-			OnBuildDone ();
+            OnBuildDone();
 		}
 
 		void OnBuildDone() 
 		{
-			mCurrentState = UBSState.postSteps;
-			Save();
+            if(mBuildAndRun)
+            {
+                mCurrentState = UBSState.done;
+                Save();
+            }
+            else 
+            {
+                mCurrentState = UBSState.postSteps;
+			    Save();
+            }
 		}
 
 		[UnityEditor.Callbacks.PostProcessBuild]
@@ -605,16 +616,23 @@ namespace UBS
 			mIndex = 0;
 			mSteps = pSteps;
 			mConfiguration = pConfiguration;
+		    mCurrentStep = null;
 		}
 		public void Clear()
 		{
 			mIndex = 0;
 			mSteps = null;
 			mConfiguration = null;
-		}
+            mCurrentStep = null;
+        }
 
 		public void MoveNext()
 		{
+			if(!UnityEditorInternal.InternalEditorUtility.inBatchMode && EditorApplication.isCompiling)
+            {
+				return; // pause while compiling. It can really mess things up. (except in batch mode) 
+            }
+
 			if(mCurrentStep == null || mCurrentStep.IsBuildStepDone())
 			{
 				NextStep();
